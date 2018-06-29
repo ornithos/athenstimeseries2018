@@ -27,7 +27,7 @@ Have fun!
  conda create -n timeseries python=3 matplotlib numpy pandas statsmodels scikit-learn jupyter
  ```
 
-3. ** How do I run the notebook?**
+3. **How do I run the notebook?**
 Let's call the virtual environment in step 2 `<env name>`. 
 Jupyter can then be launched from either:
     * **Anaconda Navigator**: please select `<env name>` from the dropdown menu at the top ("applications on..." or similar) _first_, and then launch jupyter notebook; or
