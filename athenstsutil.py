@@ -13,6 +13,8 @@ with warnings.catch_warnings():
 # Utilities for ACM Athens Data Science Summer School: Time Series.
 # Alex Bird June 2018. Some functions copied from github.com/ornithos/pyalexutil
 
+MM = os.path.splitext(os.path.basename(__file__))[0]
+
 def _run_length_encoding(x):
     """
     from https://github.com/ornithos/pyalexutil/manipulate.py
@@ -150,7 +152,7 @@ class mhealth_data(object):
         taking the first amt * n values (time series so not shuffled.)
         """
         trn_n = np.round(self.n * 0.7)
-        y = self.annotations(as_one_hot=True).loc[:trn_n]
+        y = self.annotations(as_one_hot=False).loc[:trn_n]
         return self.data.loc[:trn_n, :], y
 
     def test(self, trn_amt=0.7):
@@ -160,7 +162,7 @@ class mhealth_data(object):
         taking the values after amt * n values used for training
         """
         trn_n = np.round(self.n * 0.7)
-        y = self.annotations(as_one_hot=True).loc[trn_n:]
+        y = self.annotations(as_one_hot=False).loc[trn_n:]
         return self.data.loc[trn_n::], y
 
 
@@ -189,7 +191,7 @@ def _get_stairs_ar_prediction_data(training_set, test_set, training_ixs):
     return training_set, test_set, training_ixs
 
 
-def ARMA_plot_predictions(arma_order, channel, training_set=None, test_set=None, training_ixs=None):
+def ARMA_plot_predictions(arma_order, channel, training_set=None, test_set=None, training_ixs=None, title=None):
     """
     plot predictions for Exercise 1 for specified ARMA order.
     """
@@ -211,6 +213,8 @@ def ARMA_plot_predictions(arma_order, channel, training_set=None, test_set=None,
         ax.plot(np.arange(i, i+60), forecast)
         ax.axvline(i, color='k', linestyle=':')
     f.set_size_inches(8,6)
+    if title:
+        f.suptitle(title)
     plt.tight_layout()
 
 
@@ -250,9 +254,9 @@ def check_training_data(x1, x2, x3, x4, x5):
     Xtrain_wdws = []
 
     for k, x in X.iteritems():
-        tmp = np.zeros((n-19, 20))
-        for i in range(n-19):
-            tmp[i,:] = x.values[i:i+20]
+        tmp = np.zeros((n-5, 6))
+        for i in range(n-5):
+            tmp[i,:] = x.values[i:i+6]
         Xtrain_wdws.append(tmp)
 
     def check_x(x_check, x_true, id):
@@ -272,8 +276,18 @@ def check_training_data(x1, x2, x3, x4, x5):
     check_x(x4, Xtrain_wdws[3], 4)
     check_x(x5, Xtrain_wdws[4], 5)
 
+    key = MM
+    code = '¤ãÔÔàßÙæè\x94ÐÞÆÙÖ\x85××ÙÔè\x94ÜØÆÙØ\x85ÔèæÜäéÜØÚ¢'
+    
+    encoded_chars = []
+    for i in range(len(code)):
+        key_c = key[i % len(key)]
+        encoded_c = chr(ord(code[i]) - ord(key_c) % 256)
+        encoded_chars.append(encoded_c)
+    passphrase = "".join(encoded_chars)
+    
     print(" ------------------ CORRECT --------------------")
-    print("CODEPHRASE FOR EXERCISE: 'Man, what are you doing with a gun in space?'")
+    print("CODEPHRASE FOR EXERCISE: " + passphrase)
 
 
 def get_sliding_training_test_data(as_lists=True):
@@ -296,25 +310,25 @@ def get_sliding_training_test_data(as_lists=True):
     Xtest, ytest_ = mhdata.test()
 
     n, d = X.shape
-    ytrain = ytrain_[19:]
+    ytrain = ytrain_[5:]
     Xtrain_wdws = []
 
     for k, x in X.iteritems():
-        tmp = np.zeros((n-19, 20))
-        for i in range(n-19):
-            tmp[i,:] = x.values[i:i+20]
+        tmp = np.zeros((n-5, 6))
+        for i in range(n-5):
+            tmp[i,:] = x.values[i:i+6]
         Xtrain_wdws.append(tmp)
 
     Xtrain_wdws[4][-1,-1] += 1e-2  # avoid cheats
 
     ntest, dtest = Xtest.shape
-    ytest = ytest_[19:]
+    ytest = ytest_[5:]
     Xtest_wdws = []
 
     for k, x in Xtest.iteritems():
-        tmp = np.zeros((ntest-19, 20))
-        for i in range(ntest-19):
-            tmp[i,:] = x.values[i:i+20]
+        tmp = np.zeros((ntest-5, 6))
+        for i in range(ntest-5):
+            tmp[i,:] = x.values[i:i+6]
         Xtest_wdws.append(tmp)
 
     if as_lists:

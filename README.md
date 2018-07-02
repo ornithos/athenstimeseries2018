@@ -17,7 +17,7 @@ Have fun!
 
 ### Troubleshooting
 
-1. **I don't have Anaconda/Python3**. We highly recommend installing Anaconda. See installation instructions [here](https://conda.io/docs/user-guide/install/index.html). You're welcome to use Python without Anaconda, but you're on your own if you do!
+1. **I don't have Anaconda/Python3**. We highly recommend installing Anaconda. See installation instructions [here](https://conda.io/docs/user-guide/install/index.html). Miniconda is also a good option if you're comfortable using the command line. You're welcome to use Python without Anaconda, but you're on your own if you do!
 
 2. **I don't have the above packages / I'm not sure I have the above packages**. It's often sensible to set up a virtual environment for new package requirements. 
     * **I know what a virtual environment is, and no, I don't want a new one**. Sure, activate an existing virtual environment and install the above packages using `conda install <package name(s)>`.
@@ -37,6 +37,6 @@ conda activate <env name>
 jupyter notebook
 ```
 
- The notebook server should appear in your browser. Simply navigate to the (this) notebook file and open it.
+ The notebook server should appear in your browser. Simply navigate to the notebook file and open it.
 
 --------------
