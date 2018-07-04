@@ -5,6 +5,11 @@ import warnings
 import os
 import scipy.io as sio
 from sklearn.preprocessing import MultiLabelBinarizer
+
+import matplotlib.gridspec as gridspec
+import matplotlib.cm as cm
+from matplotlib.colors import LinearSegmentedColormap, Colormap
+
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=FutureWarning)  
     from statsmodels.tsa.arima_process import ArmaProcess
@@ -340,6 +345,60 @@ def get_sliding_training_test_data(as_lists=True):
 
     return Xtrain, ytrain, Xtest, ytest
 
+
+def plot_seq_classification(ytrue, yhat_prob, cmap=cm.viridis):
+    """
+    Plot the predictions of a classification on a sequential task.
+    This function plots the true class sequentially as colors, and beneath it
+    plots the probabilities given to each of these classes by the classifier.
+
+    :param ytrue. -- a 1D pd.Series or numpy array where each element is the true label.
+    :param yhat_prob -- a 2D numpy array of probabilities where each column is the 
+                         predicted probability for the respective class. This can be
+                         achieved from a sklearn classifier by using .predict_proba()
+    :param cmap -- an optional colormap that the user can specify. See Matplotlib docs.
+    
+    (While in principle this function was built to be more general than for the current
+    task, absolutely no testing has been done. Caveat emptor.)
+    """
+    assert isinstance(ytrue, (np.ndarray, pd.Series)) and ytrue.ndim == 1, "ytrue should be 1D Series or numpy array"
+    
+    max_class = max(ytrue)
+    min_class = min(ytrue)
+    k = max_class - min_class + 1
+    
+    n = ytrue.shape[0]
+    assert isinstance(yhat_prob, np.ndarray) and yhat_prob.ndim == 2, "yhat_prob should be 2D numpy array"
+    assert yhat_prob.shape == (n, k), "expecting yhat_prob of shape {:d}x{:d}".format(n, k)
+    assert isinstance(cmap, Colormap), "cmap is not valid matplotlib colormap"
+    
+    if k != len(np.unique(ytrue)):
+        warnings.warn("plotting function assumes all classes are represented from min_class, ..., max_class" + \
+                     ". May not work properly.")
+    
+    def make_seq_cmap(rgbvals, name):
+        colors = [(1,1,1), rgbvals]
+        return LinearSegmentedColormap.from_list('seq'+str(name), colors, N=100)
+
+    plt.figure(figsize = (8, 1.4 + k/1.5))
+    gs = gridspec.GridSpec(k+1, 1)
+    gs.update(wspace=0.025, hspace=0.5) # set the spacing between axes. 
+
+    for i in range(k+1):
+        ax = plt.subplot(gs[i])
+        # plot
+        if i > 0:
+            p_i = np.tile(yhat_prob[:,i-1], (2,1))
+            ax.imshow(p_i, aspect="auto", cmap=make_seq_cmap(cmap((i-1)/3), 1))
+            ax.set_ylabel(int(min_class + i - 1), rotation=0, labelpad=10)
+        else:
+            ax.imshow(np.tile(ytrue, (2,1)), aspect="auto", cmap=cmap)
+            ax.set_ylabel("true", rotation=0, labelpad=10)
+
+        # remove axes as appropriate
+        if i < 4:
+            ax.get_xaxis().set_visible(False)
+        ax.set_yticklabels([])
 
 # def _load_baby_data(fpath):
 #     # Ingest MATLAB data file .mat, collect into relevant numpy
